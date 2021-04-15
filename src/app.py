@@ -2,35 +2,34 @@ from datetime import timedelta
 from flask import Flask, jsonify
 from flask_restful import Api
 from resources.todos import Todo, TodoManager
-from resources.users import UserRegister, UserInformation
-from flask_jwt import JWT
+from resources.users import UserLogin, UserRegister, UserInformation
 from db import db
-from security import authenticate, identify
+from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
 
 # Configurations BEGIN
 app.config["JWT_SECRET_KEY"] = "SECRET_KEY"
 app.config["JWT_EXPIRATION_DELTA"] = timedelta(seconds=3600)
-app.config["JWT_AUTH_URL_RULE"] = "/login"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 # Configuration END
 
 api = Api(app)
 
-jwt = JWT(app, authenticate, identify)
+jwt = JWTManager(app)
 
 
 @app.route("/")  # type: ignore
 def hello() -> object:
-    return jsonify({"message": "Hello World"})
+    return jsonify({"message": "Welcome to Todo APP"})
 
 
 api.add_resource(Todo, "/todo")
-api.add_resource(TodoManager, "/todo/<int:id>")
+api.add_resource(TodoManager, "/todo/<int:todo_id>")
 api.add_resource(UserRegister, "/register")
 api.add_resource(UserInformation, "/me")
+api.add_resource(UserLogin, "/login")
 
 
 @app.before_first_request
