@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 from flask import Flask, jsonify
 from flask_restful import Api
 from resources.todos import Todo, TodoManager
@@ -35,6 +36,49 @@ def refresh() -> object:
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity, fresh=False)
     return jsonify(access_token=access_token)
+
+
+# The following callbacks are used for customizing jwt response/error messages.
+# The original ones may not be in a very pretty format (opinionated)
+@jwt.expired_token_loader
+def expired_token_callback() -> object:
+    return jsonify({"message": "The token has expired.", "error": "token_expired"}), 401
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(
+    error: Any,
+) -> object:
+    # we have to keep the argument here, since it's passed in by the caller internally
+    return (
+        jsonify(
+            {"message": "Signature verification failed.", "error": "invalid_token"}
+        ),
+        401,
+    )
+
+
+@jwt.unauthorized_loader
+def missing_token_callback(error: Any) -> object:
+    return (
+        jsonify(
+            {
+                "message": "Request does not contain an access token.",
+                "error": "authorization_required",
+            }
+        ),
+        401,
+    )
+
+
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback() -> object:
+    return (
+        jsonify(
+            {"message": "The token is not fresh.", "error": "fresh_token_required"}
+        ),
+        401,
+    )
 
 
 api.add_resource(Todo, "/todo")
