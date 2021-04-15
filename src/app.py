@@ -43,12 +43,6 @@ api.add_resource(UserRegister, "/register")
 api.add_resource(UserInformation, "/me")
 api.add_resource(UserLogin, "/login")
 
-
-@app.before_first_request
-def create_tables() -> None:
-    db.create_all()
-
-
 if __name__ == "__main__":
     db.init_app(app)
     app.run(debug=False)
