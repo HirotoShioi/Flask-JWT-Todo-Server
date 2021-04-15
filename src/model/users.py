@@ -1,5 +1,6 @@
 from db import db
 from typing import Optional, Any
+from passlib.hash import argon2
 
 
 class UserModel(db.Model):
@@ -7,11 +8,11 @@ class UserModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80))
-    password = db.Column(db.String(16))
+    password = db.Column(db.String(120))
 
     def __init__(self, username: str, password: str) -> None:
         self.username = username
-        self.password = password
+        self.password = argon2.hash(password)
 
     def save_to_db(self) -> None:
         db.session.add(self)
