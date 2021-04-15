@@ -22,7 +22,7 @@ class TodoModel(db.Model):
             "id": self.id,
             "todo": self.todo,
             "complete": self.completed,
-            "created_at": int(self.created_at.timestamp()),
+            "created_at": self.created_at.isoformat(),
             "user_id": self.user_id,
         }
 
